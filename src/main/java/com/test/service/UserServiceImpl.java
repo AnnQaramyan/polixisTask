@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,11 +24,14 @@ public class UserServiceImpl implements UserService {
     @Autowired
     UserRepository userRepository;
 
+    public static final String ZIP_PATH = "src/main/resources/data.zip";
+
     @Override
     public void save() throws IOException, ParseException {
 
-        ZipFile zipFile = new ZipFile("src/main/resources/data.zip");
-        userRepository.saveAll(unZip(zipFile));
+        ZipFile zipFile = new ZipFile(ZIP_PATH);
+        List<User> userList = unZip(zipFile);
+        userRepository.saveAll(userList);
 
     }
 
@@ -35,7 +39,7 @@ public class UserServiceImpl implements UserService {
     public List<User> unZip(ZipFile zipFile) throws IOException, ParseException {
 
         Enumeration<? extends ZipEntry> entries = zipFile.entries();
-        ZipEntry entry = null;
+        ZipEntry entry;
         InputStream stream = null;
         BufferedReader br = null;
         List<User> userList = new ArrayList<>();
@@ -43,12 +47,13 @@ public class UserServiceImpl implements UserService {
         while (entries.hasMoreElements()) {
             entry = entries.nextElement();
             stream = zipFile.getInputStream(entry);
-            br = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+            br = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
             String line;
 
             while ((line = br.readLine()) != null) {
                 String[] userData = line.split(",");
 
+                //This check is intended to prevent columns' names from being sent to the database
                 if (userData[0].equals("firstName")) {
                     continue;
                 }
@@ -56,8 +61,13 @@ public class UserServiceImpl implements UserService {
                 userList.add(new User(userData[0], userData[1], checkTypeOfDate(line)));
             }
         }
-        br.close();
-        stream.close();
+
+        if(br != null) {
+            br.close();
+        }
+        if(stream != null) {
+            stream.close();
+        }
 
         return userList;
     }
@@ -95,5 +105,4 @@ public class UserServiceImpl implements UserService {
             return new SimpleDateFormat("MMMM d'th', yyyy");
         }
     }
-
 }
