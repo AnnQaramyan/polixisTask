@@ -1,10 +1,14 @@
 package com.test.service;
 
 import com.test.model.User;
-import com.test.repository.UserRepository;
+import com.test.repository.UserRepositoryTest;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.batch.api.BatchProperty;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,26 +16,24 @@ import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-@Service
-public class UserServiceImpl implements UserService {
+
+@RunWith(SpringRunner.class)
+@EnableBatchProcessing
+public class UserServiceImplTest {
 
     @Autowired
-    UserRepository userRepository;
+    UserRepositoryTest userRepositoryTest;
 
-    @Override
-    public void save() throws IOException, ParseException {
 
-        ZipFile zipFile = new ZipFile("src/main/resources/data.zip");
-        userRepository.saveAll(unZip(zipFile));
-
-    }
-
-    //The function helps to get a stream from Zip file, and to go through all the files and then all the lines of the files.
+    @Test
     public List<User> unZip(ZipFile zipFile) throws IOException, ParseException {
 
         Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -62,7 +64,8 @@ public class UserServiceImpl implements UserService {
         return userList;
     }
 
-    //The function takes the date of each line , understands the format and returns milliseconds for that date.
+    //Different type of date parse to Date
+    @Test
     public long checkTypeOfDate(String line) throws ParseException {
         String[] userData = line.split(",");
 
@@ -80,7 +83,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    //The function returns the format to the appropriate date
+    @Test
     private DateFormat generateDateFormat(String input) {
         Pattern pattern1 = Pattern.compile("[a-zA-Z]+ [0-9]+st, [0-9]{4}", Pattern.CASE_INSENSITIVE);
         Pattern pattern2 = Pattern.compile("[a-zA-Z]+ [0-9]+nd, [0-9]{4}", Pattern.CASE_INSENSITIVE);
@@ -95,5 +98,4 @@ public class UserServiceImpl implements UserService {
             return new SimpleDateFormat("MMMM d'th', yyyy");
         }
     }
-
 }

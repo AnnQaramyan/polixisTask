@@ -2,7 +2,6 @@ package com.test.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -22,9 +21,9 @@ public class User {
     private String lastName;
 
     @Column(name = "date")
-    private Date date;
+    private long date;
 
-    public User(String firstName, String lastName, Date date) {
+    public User(String firstName, String lastName, long date) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.date = date;
@@ -58,11 +57,11 @@ public class User {
         this.lastName = lastName;
     }
 
-    public Date getDate() {
+    public long getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(long date) {
         this.date = date;
     }
 
@@ -71,7 +70,7 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id == user.id && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(date, user.date);
+        return id == user.id && date == user.date && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName);
     }
 
     @Override
